@@ -135,7 +135,7 @@ write.csv(metadata_relLx,
 
 relLx_data_raw <- map2(metadata_relLx$case_page, 1:length(metadata_relLx$case_page), function(case_page, n){
   
-  cat(paste0("\n\n", "scraping case ", n, "\n\n"))
+  cat(paste0("\n\n\n", "scraping case ", n, "\n\n\n"))
   
   ## check the internet conection, and wait if it is weak. If not, just parse the HTML page
   con_test <- try(parsed_case_page <- case_page %>%
