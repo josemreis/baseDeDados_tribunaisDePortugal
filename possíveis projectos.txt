@@ -1,0 +1,3 @@
+* A distribuiçao de cases nos tribunais da relacao é verdadeiramente aleatória? 
+- Agregar casos por matéria em mao, ano, e outros metadados, e comparar as estatisticas com valores simulados verdadeiramente aleatórios
+- ler https://www.dn.pt/poder/interior/e-possivel-manipular-o-sorteio-de-juizes-sim-mas-fica-tudo-registado-10018759.html 

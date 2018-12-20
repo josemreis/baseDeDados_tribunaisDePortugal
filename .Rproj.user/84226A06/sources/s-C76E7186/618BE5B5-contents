@@ -1,0 +1,2 @@
+case_page %>%
+  read_html()
