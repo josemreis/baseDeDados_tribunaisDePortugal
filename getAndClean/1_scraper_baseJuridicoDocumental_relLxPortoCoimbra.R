@@ -12,7 +12,7 @@
 
 #### Setting things up-------------------------------------------------------------------------------
 
-### ICJ sub-directory as the main current directory
+### sub-directory as the main current directory
 main_dir <- getwd()
 setwd(paste0(main_dir, "/getAndClean"))
 
