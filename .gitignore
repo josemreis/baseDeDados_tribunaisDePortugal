@@ -2,3 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
+getAndClean/data
+getAndClean/interm_data
