@@ -6,7 +6,7 @@
 
 ### Date: 29/11/2018
 
-### Purpose: criar base the dados com todos os casos das relaçoes de lisboa (http://www.dgsi.pt/jtrl.nsf?OpenDatabase), porto (http://www.dgsi.pt/jtrp.nsf?OpenDatabase), e coimbra (http://www.dgsi.pt/jtrc.nsf?OpenDatabase)
+### Purpose: Criar base the dados com todos os casos das relaçoes de lisboa (http://www.dgsi.pt/jtrl.nsf?OpenDatabase), Porto (http://www.dgsi.pt/jtrp.nsf?OpenDatabase), e Coimbra (http://www.dgsi.pt/jtrc.nsf?OpenDatabase)
 
 ############################################################################
 
