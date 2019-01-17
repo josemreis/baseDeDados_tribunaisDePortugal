@@ -95,7 +95,7 @@ scraper_casePages_bjd <- function(index_data = index_table,
       html_table() %>%
       as_tibble() %>%
       mutate(case_page = parsed_sub_page %>%
-               html_nodes("td td a") %>%
+               html_nodes("td td font a") %>%
                html_attr("href") %>%
                paste0("http://www.dgsi.pt", .)) %>%
       set_names(str_to_lower(names(.))) %>%
@@ -133,9 +133,9 @@ write.csv(metadata_relLx,
 
 ### scrape the metadata of the cases ---> Relacao do Porto
 metadata_relPorto <- scraper_casePages_bjd(index_data = index_table,
-                                        inst_regex = "Rela.*Porto")
+                                          inst_regex = "Rela.*Porto")
 
-beepr::beep(8)
+beepr::beep(9)
 
 ## export it
 save(metadata_relPorto,
@@ -147,7 +147,7 @@ write.csv(metadata_relPorto,
 metadata_relCoimbra <- scraper_casePages_bjd(index_data = index_table,
                                         inst_regex = "Rela.*Coimbra")
 
-beepr::beep(8)
+beepr::beep(9)
 
 ## export it
 save(metadata_relCoimbra,
