@@ -132,28 +132,28 @@ write.csv(metadata_relLx,
 
 
 ### scrape the metadata of the cases ---> Relacao do Porto
-metadata_relLx <- scraper_casePages_bjd(index_data = index_table,
+metadata_relPorto <- scraper_casePages_bjd(index_data = index_table,
                                         inst_regex = "Rela.*Porto")
 
 beepr::beep(8)
 
 ## export it
-save(metadata_relLx,
-     file = "interm_data/metadata_casos_relLx.Rdata")
-write.csv(metadata_relLx,
-          file = "interm_data/metadata_casos_relLx.csv")
+save(metadata_relPorto,
+     file = "interm_data/metadata_casos_relPorto.Rdata")
+write.csv(metadata_relPorto,
+          file = "interm_data/metadata_casos_relPorto.csv")
 
-### scrape the metadata of the cases ---> Relacao do Porto
-metadata_relLx <- scraper_casePages_bjd(index_data = index_table,
+### scrape the metadata of the cases ---> Relacao doe Coimbra
+metadata_relCoimbra <- scraper_casePages_bjd(index_data = index_table,
                                         inst_regex = "Rela.*Coimbra")
 
 beepr::beep(8)
 
 ## export it
-save(metadata_relLx,
-     file = "interm_data/metadata_casos_relLx.Rdata")
-write.csv(metadata_relLx,
-          file = "interm_data/metadata_casos_relLx.csv")
+save(metadata_relCoimbra,
+     file = "interm_data/metadata_casos_relCoimbra.Rdata")
+write.csv(metadata_relCoimbra,
+          file = "interm_data/metadata_casos_relCoimbra.csv")
 
 
 #### Scraping the case data------------------------------------------------------------------
