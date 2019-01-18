@@ -341,10 +341,6 @@ decision_data_raw <- map2(head(metadata_rel$case_page, 30), head(metadata_rel$pr
   ### store the decision text in the corpus
   if(md_table$decisao_disponivel == "texto integral"){
     
-    ## some pre-processing
-    decisao_texto_integral <- str_replace_all("")
-    
-    
     cat(decisao_texto_integral,
         file = corpus_id)
     
