@@ -372,13 +372,6 @@ decision_data_raw <- map2(metadata_rel$case_page, metadata_rel$proc, function(ca
   
 })
   
-beepr::beep(8)
-
-## export it
-save(relLx_data_raw,
-     file = "interm_data/raw_relLx_data.Rdata")
-write.csv(relLx_data_raw,
-          file = "interm_data/raw_relLx_data.csv")
 
   
   
