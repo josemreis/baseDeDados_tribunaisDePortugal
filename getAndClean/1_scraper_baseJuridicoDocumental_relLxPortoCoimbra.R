@@ -94,6 +94,7 @@ scraper_casePages_bjd <- function(index_data = index_table,
       html_node(xpath = "//td//table") %>%
       html_table() %>%
       as_tibble() %>%
+      subset(., nchar(PROCESSO > 2) & RELATOR != "N") %>%
       mutate(case_page = parsed_sub_page %>%
                html_nodes("td td font a") %>%
                html_attr("href") %>%
@@ -122,7 +123,7 @@ scraper_casePages_bjd <- function(index_data = index_table,
 metadata_relLx <- scraper_casePages_bjd(index_data = index_table,
                                         inst_regex = "Rela.*Lisboa")
 
-beepr::beep(9)
+beepr::beep(8)
 
 ## export it
 save(metadata_relLx,
@@ -135,7 +136,7 @@ write.csv(metadata_relLx,
 metadata_relPorto <- scraper_casePages_bjd(index_data = index_table,
                                           inst_regex = "Rela.*Porto")
 
-beepr::beep(9)
+beepr::beep(8)
 
 ## export it
 save(metadata_relPorto,
@@ -147,7 +148,7 @@ write.csv(metadata_relPorto,
 metadata_relCoimbra <- scraper_casePages_bjd(index_data = index_table,
                                         inst_regex = "Rela.*Coimbra")
 
-beepr::beep(9)
+beepr::beep(8)
 
 ## export it
 save(metadata_relCoimbra,
