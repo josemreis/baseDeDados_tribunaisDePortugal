@@ -122,7 +122,7 @@ scraper_casePages_bjd <- function(index_data = index_table,
 metadata_relLx <- scraper_casePages_bjd(index_data = index_table,
                                         inst_regex = "Rela.*Lisboa")
 
-beepr::beep(8)
+beepr::beep(9)
 
 ## export it
 save(metadata_relLx,
