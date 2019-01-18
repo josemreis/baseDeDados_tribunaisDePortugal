@@ -219,7 +219,7 @@ write.csv(metadata_rel,
 
 
 
-decision_data_raw <- map2(metadata_rel$case_page, metadata_rel$proc, function(case_page, proc){
+decision_data_raw <- map2(head(metadata_rel$case_page, 30), head(metadata_rel$proc, 30), function(case_page, proc){
   
   cat(paste0("\n\n\n", "scraping case ", proc, "\n\n\n"))
   
@@ -293,7 +293,7 @@ decision_data_raw <- map2(metadata_rel$case_page, metadata_rel$proc, function(ca
                   silent = TRUE)
   
   ## if md_table is empty, assign NA
-  if(class(md_table) == "try-error" ||is_empty(md_table) || ncol < 2){
+  if(class(md_table) == "try-error" ||is_empty(md_table) || ncol(md_table) < 2){
     
     md_table <- NA_character_
     
@@ -341,6 +341,9 @@ decision_data_raw <- map2(metadata_rel$case_page, metadata_rel$proc, function(ca
   ### store the decision text in the corpus
   if(md_table$decisao_disponivel == "texto integral"){
     
+    ## some pre-processing
+    decisao_texto_integral <- str_replace_all("")
+    
     
     cat(decisao_texto_integral,
         file = corpus_id)
@@ -364,7 +367,7 @@ decision_data_raw <- map2(metadata_rel$case_page, metadata_rel$proc, function(ca
   
   
   
-  print(md_table[,sample(1:ncol(case_table), 4)])
+  print(md_table[,sample(1:ncol(md_table), 4)])
   
   return(md_table)
   
