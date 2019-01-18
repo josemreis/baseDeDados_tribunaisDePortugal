@@ -1,6 +1,6 @@
 ############################################################################
 
-## file: 1_scraper_baseJuridicoDocumental_relLxPortoCoimbra.R
+## file: 1_scraper_baseJuridicoDocumental_2ainstancia.R
 
 ### Author: J. M. Reis
 
@@ -35,6 +35,13 @@ if(!dir.exists("data")){
 if(!dir.exists("interm_data")){
   
   dir.create("interm_data")
+  
+}
+
+## decision_corpus
+if(!dir.exists("dec_corpus")){
+  
+  dir.create("dec_corpus")
   
 }
 
@@ -202,9 +209,6 @@ metadata_rel[, relacao := str_trim(str_extract(relacao, regex("(?<=ção\\s{1,6}de
 ## coerce it back into tibble 
 metadata_rel <- as_tibble(metadata_rel)
 
-
-
-
 ## export it
 save(metadata_rel,
      file = "data/1_metadata_casos_relTodas.Rdata")
@@ -213,9 +217,11 @@ write.csv(metadata_rel,
 
 #### Scraping the case data------------------------------------------------------------------
 
-relLx_data_raw <- map2(metadata_relLx$case_page, 1:length(metadata_relLx$case_page), function(case_page, n){
+
+
+decision_data_raw <- map2(metadata_rel$case_page, metadata_rel$proc, function(case_page, proc){
   
-  cat(paste0("\n\n\n", "scraping case ", n, "\n\n\n"))
+  cat(paste0("\n\n\n", "scraping case ", proc, "\n\n\n"))
   
   ## check the internet conection, and wait if it is weak. If not, just parse the HTML page
   con_test <- try(parsed_case_page <- case_page %>%
@@ -232,60 +238,137 @@ relLx_data_raw <- map2(metadata_relLx$case_page, 1:length(metadata_relLx$case_pa
   }
   
   ### scrape the case details table
-  md_table <- parsed_case_page %>%
-    html_node(xpath = "//table") %>%
-    html_table(fill = TRUE) %>%
-    as_tibble() %>%
-    select(1:2) %>%
-    filter(str_detect(X1, "\\:$")) %>%
-    t() %>%
-    as_tibble() %>%
-    set_names(.,
-              nm = .[1,] %>%
-                str_replace_all(., "[[:punct:]]|º", "") %>%
-                str_to_lower() %>%
-                str_replace_all(., "\\s+", "_")) %>%
-    slice(2) %>%
-    mutate_all(funs(str_replace_all(., "[[:cntrl:]]", "; ")))
+  md_table <- try(parsed_case_page %>%
+                    html_nodes(xpath = "//table") %>%
+                    html_table(fill = TRUE) %>%
+                    `[[`(1) %>%
+                    as_tibble() %>%
+                    filter(str_detect(X1, "\\:$")) %>%
+                    t() %>%
+                    as_tibble() %>%
+                    set_names(.,
+                              nm = .[1,] %>%
+                                str_replace_all(., "[[:punct:]]|º", "") %>%
+                                str_to_lower() %>%
+                                str_replace_all(., "\\s+", "_")) %>%
+                    slice(2) %>%
+                    mutate_all(funs(str_replace_all(., "[[:cntrl:]]", "; "))) %>%
+                    mutate(proc = proc) %>%
+                    select(., one_of(c("processo", 
+                                       "relator",
+                                       "data_do_acordão",
+                                       "data_do_acordao",
+                                       "tribunal_recorrido",
+                                       "tribunal_recurso",
+                                       "data_dec_recorrida",
+                                       "área_tematica",
+                                       "área_temática",
+                                       "area_tematica",
+                                       "descritores",
+                                       "meio_processual",
+                                       "legislação_nacional",
+                                       "legislaçao_nacional",
+                                       "jurisprudência_nacional",
+                                       "jurisprudencia_nacional",
+                                       "decisão",
+                                       "decisao",
+                                       "votação",
+                                       "votaçao",
+                                       "votacão",
+                                       "votacao",
+                                       "n_convencional",
+                                       "sumário",
+                                       "sumario",
+                                       "privacidade",
+                                       "n_do_documento",
+                                       "reclamações",
+                                       "reclamacões",
+                                       "reclamaçoes",
+                                       "reclamacoes",
+                                       "indicações_eventuais",
+                                       "indicaçoes_eventuais",
+                                       "indicacoes_eventuais",
+                                       "indicacões_eventuais",
+                                       "processo_no_tribunal_recorrido"))),
+                  silent = TRUE)
   
-  ### Next, we check if the "integral text" row exists. If yes, we scrape it and add it to the table above.
-  dec_table <- parsed_case_page %>%
-      html_node(xpath = "//table[2]") %>%
-      html_table(fill = TRUE) %>%
-      as_tibble() %>%
-      select(1:2) %>%
-      filter(str_detect(X1, "\\:")) %>%
-      t() %>%
-      as_tibble() %>%
-      set_names(.,
-                nm = .[1,] %>%
-                  str_replace_all(., "[[:punct:]]|º", "") %>%
-                  str_to_lower() %>%
-                  str_replace_all(., "\\s+", "_")) %>%
-      slice(2)
+  ## if md_table is empty, assign NA
+  if(class(md_table) == "try-error" ||is_empty(md_table) || ncol < 2){
+    
+    md_table <- NA_character_
+    
+  }
   
-  if(ncol(dec_table) == 1){
+  ### Next, we get the integral or partial decisions, when existing. If not, assign NA
+  ### partial
+  decisao_texto_parcial <- try(parsed_case_page %>%
+                                 html_nodes(xpath = "//td[preceding-sibling::td/b/font[contains(text(), 'o Texto Parcial')]]") %>%
+                                 html_text(),
+                               silent = TRUE) 
+  
+  decisao_texto_parcial <- ifelse(is_empty(decisao_texto_parcial) || nchar(decisao_texto_parcial) < 5,
+                                   NA_character_,
+                                   decisao_texto_parcial)
+  
+  ### integral
+  decisao_texto_integral <- try(parsed_case_page %>%
+                                  html_nodes(xpath = "//td[preceding-sibling::td/b/font[contains(text(), 'o Texto Integral')]]") %>%
+                                  html_text(),
+                                silent = TRUE) 
+  
+  decisao_texto_integral <- ifelse(is_empty(decisao_texto_integral) || nchar(decisao_texto_integral) < 5,
+                                    NA_character_,
+                                    decisao_texto_integral)
+  
+  #### categorical variable for the decision
+  md_table$decisao_disponivel <- if_else(!is.na(decisao_texto_integral),
+                                         "texto integral",
+                                         if_else(!is.na(decisao_texto_parcial),
+                                                 "texto parcial",
+                                                 "texto nao disponivel"))
+  
+  #### Generate a corpus id
+  corpus_id <- paste0("dec_corpus/",
+    str_extract(case_page, "(?<=pt\\/).*?(?=\\.nsf)"),
+    "_",
+    str_replace_all(proc, "[[:punct:]]", "_"),
+    ".txt"
+  )
+  
+  ### assign corpus id to the dataset
+  md_table$corpus_id <- corpus_id
+  
+  ### store the decision text in the corpus
+  if(md_table$decisao_disponivel == "texto integral"){
     
     
-    md_table$decisao_texto <- pull(dec_table[1])
+    cat(decisao_texto_integral,
+        file = corpus_id)
+    
+    
+  } else if(md_table$decisao_disponivel == "texto parcial"){
+    
+    
+    
+    cat(decisao_texto_integral,
+        file = corpus_id)
     
   } else {
     
-    md_table$decisao_texto <- NA_character_
+    
+    cat("Decisao nao publicada",
+        file = corpus_id)
     
     
   }
   
-  case_table <- md_table %>%
-    mutate(case_page = case_page,
-           dateOfAccess = Sys.Date()) %>%
-    select(data_do_acordao = "data_do_acordão", relator, decisao = "decisão", votacao = "votação", palavras_chave = descritores, meio_processual, sumario = "sumário", decisao_texto, one_of("decisão_texto_parcial", "decisão_texto_integral"), dateOfAccess, case_page)
   
-  print(case_table[,sample(1:ncol(case_table), 4)])
   
-  return(case_table)
+  print(md_table[,sample(1:ncol(case_table), 4)])
   
-  Sys.sleep(runif(2,1,3))
+  return(md_table)
+  
+  Sys.sleep(sample(1:6, 1))
   
 })
   
