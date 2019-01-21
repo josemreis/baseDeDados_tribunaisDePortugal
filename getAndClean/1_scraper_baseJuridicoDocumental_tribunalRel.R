@@ -215,9 +215,7 @@ save(metadata_rel,
 write.csv(metadata_rel,
           file = "data/1_metadata_casos_relTodas.csv")
 
-#### Scraping the case data------------------------------------------------------------------
-
-
+#### Scraping the case data and decisions------------------------------------------------------------------
 
 decision_data_raw <- map2(metadata_rel$case_page, metadata_rel$proc, function(case_page, proc){
   
@@ -360,7 +358,7 @@ decision_data_raw <- map2(metadata_rel$case_page, metadata_rel$proc, function(ca
   print(md_table[,sample(1:ncol(md_table), 4)])
 
   # rest time for the server
-  Sys.sleep(sample(1:10, 1))
+  Sys.sleep(sample(1:12, 1))
 
   return(md_table)
   
