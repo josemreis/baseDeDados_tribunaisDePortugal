@@ -332,8 +332,7 @@ decision_data_raw <- map2(metadata_rel$case_page, metadata_rel$proc, function(ca
     str_extract(case_page, "(?<=pt\\/).*?(?=\\.nsf)"),
     "_",
     str_replace_all(proc, "[[:punct:]]", "_"),
-    ".txt"
-  )
+    ".txt")
   
   ### assign corpus id to the dataset
   md_table$corpus_id <- corpus_id
@@ -344,30 +343,26 @@ decision_data_raw <- map2(metadata_rel$case_page, metadata_rel$proc, function(ca
     cat(decisao_texto_integral,
         file = corpus_id)
     
-    
   } else if(md_table$decisao_disponivel == "texto parcial"){
-    
-    
     
     cat(decisao_texto_integral,
         file = corpus_id)
     
   } else {
     
-    
     cat("Decisao nao publicada",
         file = corpus_id)
-    
     
   }
   
   
   
   print(md_table[,sample(1:ncol(md_table), 4)])
-  
+
+  # rest time for the server
+  Sys.sleep(sample(1:10, 1))
+
   return(md_table)
-  
-  Sys.sleep(sample(1:6, 1))
   
 })
   
