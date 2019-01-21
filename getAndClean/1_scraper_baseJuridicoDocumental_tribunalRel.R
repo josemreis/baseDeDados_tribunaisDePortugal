@@ -219,7 +219,7 @@ write.csv(metadata_rel,
 
 
 
-decision_data_raw <- map2(head(metadata_rel$case_page, 30), head(metadata_rel$proc, 30), function(case_page, proc){
+decision_data_raw <- map2(metadata_rel$case_page, metadata_rel$proc, function(case_page, proc){
   
   cat(paste0("\n\n\n", "scraping case ", proc, "\n\n\n"))
   
