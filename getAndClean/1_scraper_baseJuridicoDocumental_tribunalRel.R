@@ -217,9 +217,19 @@ write.csv(metadata_rel,
 
 #### Scraping the case data and decisions------------------------------------------------------------------
 
-decision_data_raw <- map2(metadata_rel$case_page, metadata_rel$proc, function(case_page, proc){
+map2(metadata_rel$case_page, metadata_rel$proc, function(case_page, proc){
   
+  #### Generate a corpus id
+  corpus_id <- paste0(str_extract(case_page, "(?<=pt\\/).*?(?=\\.nsf)"),
+                      "_",
+                      str_replace_all(proc, "[[:punct:]]", "_"),
+                      ".")
+  
+  ## start
   cat(paste0("\n\n\n", "scraping case ", proc, "\n\n\n"))
+  
+  ### if the data was already, jump an iteration
+  if(file.exists(paste0("dec_corpus/md_", corpus_id, "csv")) == FALSE){
   
   ## check the internet conection, and wait if it is weak. If not, just parse the HTML page
   con_test <- try(parsed_case_page <- case_page %>%
@@ -237,9 +247,8 @@ decision_data_raw <- map2(metadata_rel$case_page, metadata_rel$proc, function(ca
   
   ### scrape the case details table
   md_table <- try(parsed_case_page %>%
-                    html_nodes(xpath = "//table") %>%
+                    html_node(xpath = "//table") %>%
                     html_table(fill = TRUE) %>%
-                    `[[`(1) %>%
                     as_tibble() %>%
                     filter(str_detect(X1, "\\:$")) %>%
                     t() %>%
@@ -251,7 +260,8 @@ decision_data_raw <- map2(metadata_rel$case_page, metadata_rel$proc, function(ca
                                 str_replace_all(., "\\s+", "_")) %>%
                     slice(2) %>%
                     mutate_all(funs(str_replace_all(., "[[:cntrl:]]", "; "))) %>%
-                    mutate(proc = proc) %>%
+                    mutate(proc = proc,
+                           case_page = case_page) %>%
                     select(., one_of(c("processo", 
                                        "relator",
                                        "data_do_acordão",
@@ -261,7 +271,7 @@ decision_data_raw <- map2(metadata_rel$case_page, metadata_rel$proc, function(ca
                                        "data_dec_recorrida",
                                        "área_tematica",
                                        "área_temática",
-                                       "area_tematica",
+                                       "area-+_tematica",
                                        "descritores",
                                        "meio_processual",
                                        "legislação_nacional",
@@ -325,46 +335,44 @@ decision_data_raw <- map2(metadata_rel$case_page, metadata_rel$proc, function(ca
                                                  "texto parcial",
                                                  "texto nao disponivel"))
   
-  #### Generate a corpus id
-  corpus_id <- paste0("dec_corpus/",
-    str_extract(case_page, "(?<=pt\\/).*?(?=\\.nsf)"),
-    "_",
-    str_replace_all(proc, "[[:punct:]]", "_"),
-    ".txt")
-  
   ### assign corpus id to the dataset
-  md_table$corpus_id <- corpus_id
+  md_table$corpus_id <- paste0("dec_corpus/dec_", corpus_id, "txt")
   
   ### store the decision text in the corpus
   if(md_table$decisao_disponivel == "texto integral"){
     
     cat(decisao_texto_integral,
-        file = corpus_id)
+        file = paste0("dec_corpus/dec_", corpus_id, "txt"))
     
   } else if(md_table$decisao_disponivel == "texto parcial"){
     
     cat(decisao_texto_integral,
-        file = corpus_id)
+        file = paste0("dec_corpus/dec_", corpus_id, "txt"))
     
   } else {
     
     cat("Decisao nao publicada",
-        file = corpus_id)
+        file = paste0("dec_corpus/dec_", corpus_id, "txt"))
     
   }
   
-  
-  
-  print(md_table[,sample(1:ncol(md_table), 4)])
+  #### Export the metadata table as .csv
+  write.csv(md_table,
+            fileEncoding = "UTF-8",
+            row.names = FALSE,
+            file = paste0("dec_corpus/md_", corpus_id, "csv"))
 
   # rest time for the server
-  Sys.sleep(sample(1:12, 1))
-
-  return(md_table)
+  Sys.sleep(sample(1:6, 1))
+  
+  } else {
+    
+    print("already parsed and saved!")
+    
+    
+  }
   
 })
-  
-
   
   
   
