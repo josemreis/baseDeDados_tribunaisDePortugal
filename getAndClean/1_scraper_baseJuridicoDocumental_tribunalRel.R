@@ -45,6 +45,9 @@ if(!dir.exists("dec_corpus")){
   
 }
 
+## source relevant functions
+source("helper_functions/helperFunction_randomUserAgent.R")
+
 ### Generate a small table with the id's for the courts, url for their database, as well as the number of cases in it at the moment of the scraping. It will be useful later.
 index_table <- "http://www.dgsi.pt/" %>%
   read_html() %>%
@@ -217,6 +220,11 @@ write.csv(metadata_rel,
 
 #### Scraping the case data and decisions------------------------------------------------------------------
 
+### Make a progress bar
+pb <- progress::progress_bar$new(
+  format = "  Scraping [:bar] :percent eta: :eta",
+  total = nrow(metadata_rel), clear = FALSE, width= 60)
+
 map2(metadata_rel$case_page, metadata_rel$proc, function(case_page, proc){
   
   #### Generate a corpus id
@@ -225,14 +233,11 @@ map2(metadata_rel$case_page, metadata_rel$proc, function(case_page, proc){
                       str_replace_all(proc, "[[:punct:]]", "_"),
                       ".")
   
-  ## start
-  cat(paste0("\n\n\n", "scraping case ", proc, "\n\n\n"))
-  
   ### if the data was already, jump an iteration
   if(file.exists(paste0("dec_corpus/md_", corpus_id, "csv")) == FALSE){
   
-  ## check the internet conection, and wait if it is weak. If not, just parse the HTML page
-  con_test <- try(parsed_case_page <- case_page %>%
+  ## check the internet conection, and wait if it is weak. If not, just parse the HTML page. We will randomise the user agent in each iteration 1 from the 50 most common ones. Code from https://github.com/yusuzech/r-web-scraping-template/blob/master/README.md 
+  con_test <- try(parsed_case_page <- httr::GET(case_page, httr::user_agent(random_agent()$options$useragent)) %>%
                     read_html(), silent = TRUE)
   
   # if true, weak connection...wait 1 minute, and then reconnect and parse the HTML page
@@ -240,7 +245,7 @@ map2(metadata_rel$case_page, metadata_rel$proc, function(case_page, proc){
     
     print("reconecting in 1 minute!")
     Sys.sleep(60)
-    parsed_case_page <- case_page %>%
+    parsed_case_page <- httr::GET(case_page, httr::user_agent(random_agent()$options$useragent)) %>%
       read_html()
     
   }
@@ -361,13 +366,17 @@ map2(metadata_rel$case_page, metadata_rel$proc, function(case_page, proc){
             fileEncoding = "UTF-8",
             row.names = FALSE,
             file = paste0("dec_corpus/md_", corpus_id, "csv"))
+  
+  ## a tick for the progress bar
+  pb$tick()
 
   # rest time for the server
-  Sys.sleep(sample(1:6, 1))
+  Sys.sleep(sample(1:10, 1))
   
   } else {
-    
-    print("already parsed and saved!")
+    ### Already saved, jump to the next iteration
+    ## a tick for the progress bar
+    pb$tick()
     
     
   }
